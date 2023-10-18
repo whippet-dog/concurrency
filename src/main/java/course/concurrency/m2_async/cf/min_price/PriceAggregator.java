@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class PriceAggregator {
 
     private PriceRetriever priceRetriever = new PriceRetriever();
@@ -30,14 +32,14 @@ public class PriceAggregator {
                             }
                         })
                 )
-                .collect(Collectors.toList());
+                .collect(toList());
 
         try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(2800L, TimeUnit.MILLISECONDS);
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).get(2800L, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException ignore) {
         }
 
-        return prices.isEmpty() ? Double.NaN : prices.stream().sorted().collect(Collectors.toList()).get(0);
+        return prices.isEmpty() ? Double.NaN : prices.stream().sorted().collect(toList()).get(0);
     }
 
 //    public double getMinPrice(long itemId) throws ExecutionException, InterruptedException {
@@ -55,5 +57,26 @@ public class PriceAggregator {
 //        }
 //
 //        return chain.get();
+//    }
+
+//    public double getMinPrice(long itemId) {
+//        List<CompletableFuture<Double>> completableFutureList =
+//                shopIds.stream().map(shopId ->
+//                                CompletableFuture.supplyAsync(
+//                                                () -> priceRetriever.getPrice(itemId, shopId), executor)
+//                                        .completeOnTimeout(Double.POSITIVE_INFINITY, 2900, TimeUnit.MILLISECONDS)
+//                                        .exceptionally(ex -> Double.POSITIVE_INFINITY))
+//                        .collect(toList());
+//
+//        CompletableFuture
+//                .allOf(completableFutureList.toArray(CompletableFuture[]::new))
+//                .join();
+//
+//        return completableFutureList
+//                .stream()
+//                .mapToDouble(CompletableFuture::join)
+//                .filter(Double::isFinite)
+//                .min()
+//                .orElse(Double.NaN);
 //    }
 }
