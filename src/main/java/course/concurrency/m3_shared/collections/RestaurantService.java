@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RestaurantService {
 
@@ -13,7 +14,7 @@ public class RestaurantService {
         put("C", new Restaurant("C"));
     }};
 
-    private Object stat;
+    private Map<String, AtomicInteger> stat = new ConcurrentHashMap<>();
 
     public Restaurant getByName(String restaurantName) {
         addToStat(restaurantName);
@@ -21,11 +22,15 @@ public class RestaurantService {
     }
 
     public void addToStat(String restaurantName) {
-        // your code
+//        stat.merge();
+        stat.computeIfAbsent(restaurantName, s -> new AtomicInteger()).incrementAndGet();
     }
 
     public Set<String> printStat() {
-        // your code
-        return new HashSet<>();
+        final HashSet<String> result = new HashSet<>();
+        for (Map.Entry<String, AtomicInteger> e : stat.entrySet()) {
+            result.add(e.getKey() + " - " + e.getValue());
+        }
+        return result;
     }
 }
